@@ -23,9 +23,13 @@ export function install (_Vue) {
 function resetStoreVM (store, state, hot) {
     store.getters = {}
     const wrappedGetters = store._wrappedGetters
+    const computed = {}
     forEachValue(wrappedGetters, (fn, key) => {
+        computed[key] = () => {
+            return fn(store.state)
+        }
         Object.defineProperty(store.getters, key, {
-            get: () => fn(store.state)
+            get: () => store._vm[key]
         })
     })
 
@@ -33,7 +37,8 @@ function resetStoreVM (store, state, hot) {
     store._vm = new Vue({
         data: {
             $$state: state
-        }
+        },
+        computed
     })
     console.log('gsdstore_vm', store)
 }
