@@ -2,8 +2,9 @@
   "name": "my-vuex",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/vuex.js",
   "scripts": {
+    "build:main": "node scripts/build-main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/386083520/my-vuex/issues"
   },
-  "homepage": "https://github.com/386083520/my-vuex#readme"
+  "homepage": "https://github.com/386083520/my-vuex#readme",
+  "dependencies": {
+    "execa": "^5.0.0"
+  }
 }
