@@ -22,12 +22,17 @@
         }
     }
 
+    function forEachValue (obj, fn) {
+        Object.keys(obj).forEach(key => fn(obj[key], key));
+    }
+
     let Vue;
 
     class Store {
         constructor (options = {}) {
             console.log('gsdoptions', options);
             const state = options.state;
+            this._wrappedGetters = options.getters;
             resetStoreVM(this, state);
         }
         get state () {
@@ -41,12 +46,21 @@
     }
 
     function resetStoreVM (store, state, hot) {
+        store.getters = {};
+        const wrappedGetters = store._wrappedGetters;
+        forEachValue(wrappedGetters, (fn, key) => {
+            Object.defineProperty(store.getters, key, {
+                get: () => fn(store.state)
+            });
+        });
+
+
         store._vm = new Vue({
             data: {
                 $$state: state
             }
         });
-        console.log('gsdstore_vm', store._vm);
+        console.log('gsdstore_vm', store);
     }
 
     var index = {
