@@ -8,10 +8,26 @@ export class Store {
         console.log('gsdoptions', options)
         const state = options.state
         this._wrappedGetters = options.getters
+
+        const store = this
+        const { dispatch, commit } = this
+        this.dispatch = function boundDispatch (type, payload) {
+            return dispatch.call(store, type, payload)
+        }
+        this.commit = function boundCommit (type, payload, options) {
+            return commit.call(store, type, payload, options)
+        }
+
         resetStoreVM(this, state)
     }
     get state () {
         return this._vm._data.$$state
+    }
+    commit (_type, _payload, _options) {
+
+    }
+    dispatch (_type, _payload) {
+
     }
 }
 
