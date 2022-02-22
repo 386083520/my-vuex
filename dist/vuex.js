@@ -40,6 +40,28 @@
         addChild (key, module) {
             this._children[key] = module;
         }
+
+        forEachChild (fn) {
+            forEachValue(this._children, fn);
+        }
+
+        forEachGetter (fn) {
+            if (this._rawModule.getters) {
+                forEachValue(this._rawModule.getters, fn);
+            }
+        }
+
+        forEachAction (fn) {
+            if (this._rawModule.actions) {
+                forEachValue(this._rawModule.actions, fn);
+            }
+        }
+
+        forEachMutation (fn) {
+            if (this._rawModule.mutations) {
+                forEachValue(this._rawModule.mutations, fn);
+            }
+        }
     }
 
     class ModuleCollection {
@@ -72,12 +94,18 @@
     class Store {
         constructor (options = {}) {
             console.log('gsdoptions', options);
+            this._actions = Object.create(null);
+            this._mutations = Object.create(null);
+            this._wrappedGetters = Object.create(null);
 
             this._modules = new ModuleCollection(options);
             console.log('gsd_modules', this._modules);
-            const state = options.state;
-            this._wrappedGetters = options.getters;
+            const state = this._modules.root.state;
+            installModule(this, state, [], this._modules.root);
 
+            console.log('gsdabc', this._actions);
+            console.log('gsdabc1', this._mutations);
+            console.log('gsdabc2', this._wrappedGetters);
             const store = this;
             const { dispatch, commit } = this;
             this.dispatch = function boundDispatch (type, payload) {
@@ -98,6 +126,53 @@
         dispatch (_type, _payload) {
 
         }
+    }
+
+    function installModule (store, rootState, path, module, hot) {
+        const namespace = '';
+        const local = {
+            state: rootState
+        };
+        module.forEachMutation((mutation, key) => {
+            const namespacedType = namespace + key;
+            registerMutation(store, namespacedType, mutation, local);
+        });
+        module.forEachAction((action, key) => {
+            const type = namespace + key;
+            const handler = action.handler || action;
+            registerAction(store, type, handler);
+        });
+        module.forEachGetter((getter, key) => {
+            const namespacedType = namespace + key;
+            registerGetter(store, namespacedType, getter);
+        });
+        module.forEachChild((child, key) => {
+            installModule(store, rootState, path.concat(key), child);
+        });
+    }
+
+    function registerMutation (store, type, handler, local) {
+        const entry = store._mutations[type] || (store._mutations[type] = []);
+        entry.push(function wrappedMutationHandler (payload) {
+            handler.call(store, local.state, payload);
+        });
+    }
+
+    function registerAction (store, type, handler, local) {
+        const entry = store._actions[type] || (store._actions[type] = []);
+        entry.push(function wrappedActionHandler (payload) {
+            handler.call(store, {}, payload);
+        });
+    }
+
+    function registerGetter (store, type, rawGetter, local) {
+        if (store._wrappedGetters[type]) {
+            console.error(`[vuex] duplicate getter key: ${type}`);
+            return
+        }
+        store._wrappedGetters[type] = function wrappedGetter (store) {
+            return rawGetter()
+        };
     }
 
     function install (_Vue) {
