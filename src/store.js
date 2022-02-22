@@ -35,7 +35,14 @@ export class Store {
         return this._vm._data.$$state
     }
     commit (_type, _payload, _options) {
-
+        const entry = this._mutations[_type]
+        if (!entry) {
+            console.error(`[vuex] unknown mutation type: ${type}`)
+            return
+        }
+        entry.forEach(function commitIterator (handler) {
+            handler(_payload)
+        })
     }
     dispatch (_type, _payload) {
 
