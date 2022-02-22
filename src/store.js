@@ -53,6 +53,16 @@ function getNestedState (state, path) {
     return path.reduce((state, key) => state[key], state)
 }
 
+function makeLocalContext (store, namespace, path) {
+    const local = {}
+    Object.defineProperties(local, {
+        state: {
+            get: () => getNestedState(store.state, path)
+        }
+    })
+    return local
+}
+
 function installModule (store, rootState, path, module, hot) {
     const isRoot = !path.length
     const namespace = store._modules.getNamespace(path)
@@ -63,9 +73,7 @@ function installModule (store, rootState, path, module, hot) {
         Vue.set(parentState, moduleName, module.state)
     }
 
-    const local = {
-        state: rootState
-    }
+    const local = makeLocalContext(store, namespace, path)
     module.forEachMutation((mutation, key) => {
         const namespacedType = namespace + key
         registerMutation(store, namespacedType, mutation, local)
@@ -104,6 +112,7 @@ function registerGetter (store, type, rawGetter, local) {
         return
     }
     store._wrappedGetters[type] = function wrappedGetter (store) {
+        console.log('gsd678', local)
         return rawGetter(local.state)
     }
 }

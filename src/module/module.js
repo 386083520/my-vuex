@@ -5,7 +5,7 @@ export default class Module {
         this._children = Object.create(null)
         this._rawModule = rawModule
         const rawState = rawModule.state
-        this.state = rawState
+        this.state = (typeof rawState === 'function' ? rawState() : rawState) || {}
     }
     getChild (key) {
         return this._children[key]
