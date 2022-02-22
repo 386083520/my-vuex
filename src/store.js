@@ -10,7 +10,8 @@ export class Store {
 
         this._modules = new ModuleCollection(options)
         console.log('gsd_modules', this._modules)
-        const state = options.state
+        const state = this._modules.root.state
+        installModule(this, state, [], this._modules.root)
         this._wrappedGetters = options.getters
 
         const store = this
@@ -33,6 +34,13 @@ export class Store {
     dispatch (_type, _payload) {
 
     }
+}
+
+function installModule (store, rootState, path, module, hot) {
+    module.forEachMutation((mutation, key) => {})
+    module.forEachAction((action, key) => {})
+    module.forEachGetter((getter, key) => {})
+    module.forEachChild((child, key) => {})
 }
 
 export function install (_Vue) {
