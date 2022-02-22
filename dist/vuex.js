@@ -156,7 +156,7 @@
         });
         module.forEachGetter((getter, key) => {
             const namespacedType = namespace + key;
-            registerGetter(store, namespacedType, getter);
+            registerGetter(store, namespacedType, getter, local);
         });
         module.forEachChild((child, key) => {
             installModule(store, rootState, path.concat(key), child);
@@ -183,7 +183,7 @@
             return
         }
         store._wrappedGetters[type] = function wrappedGetter (store) {
-            return rawGetter()
+            return rawGetter(local.state)
         };
     }
 

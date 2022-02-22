@@ -96,7 +96,7 @@ function registerGetter (store, type, rawGetter, local) {
         return
     }
     store._wrappedGetters[type] = function wrappedGetter (store) {
-        return rawGetter()
+        return rawGetter(local.state)
     }
 }
 
