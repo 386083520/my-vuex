@@ -62,6 +62,10 @@
                 forEachValue(this._rawModule.mutations, fn);
             }
         }
+
+        get namespaced () {
+            return !!this._rawModule.namespaced
+        }
     }
 
     class ModuleCollection {
@@ -86,6 +90,14 @@
                     this.register(path.concat(key), rawChildModule, runtime);
                 });
             }
+        }
+        getNamespace (path) {
+            let module = this.root;
+            return path.reduce((namespace, key) => { // [a, b]
+                module = module.getChild(key);
+                console.log('gsdmodule', module);
+                return namespace + (module.namespaced ? key + '/' : '')
+            }, '')
         }
     }
 
@@ -142,7 +154,8 @@
 
     function installModule (store, rootState, path, module, hot) {
         const isRoot = !path.length;
-        const namespace = '';
+        const namespace = store._modules.getNamespace(path);
+        console.log('gsdnamespace', namespace);
         if (!isRoot) {
             const parentState = getNestedState(rootState, path.slice(0, -1));
             const moduleName = path[path.length - 1];

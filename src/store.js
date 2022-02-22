@@ -55,7 +55,8 @@ function getNestedState (state, path) {
 
 function installModule (store, rootState, path, module, hot) {
     const isRoot = !path.length
-    const namespace = ''
+    const namespace = store._modules.getNamespace(path)
+    console.log('gsdnamespace', namespace)
     if (!isRoot) {
         const parentState = getNestedState(rootState, path.slice(0, -1))
         const moduleName = path[path.length - 1]

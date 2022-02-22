@@ -35,4 +35,8 @@ export default class Module {
             forEachValue(this._rawModule.mutations, fn)
         }
     }
+
+    get namespaced () {
+        return !!this._rawModule.namespaced
+    }
 }

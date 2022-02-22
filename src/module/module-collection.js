@@ -23,4 +23,12 @@ export default class ModuleCollection {
             })
         }
     }
+    getNamespace (path) {
+        let module = this.root
+        return path.reduce((namespace, key) => { // [a, b]
+            module = module.getChild(key)
+            console.log('gsdmodule', module)
+            return namespace + (module.namespaced ? key + '/' : '')
+        }, '')
+    }
 }
