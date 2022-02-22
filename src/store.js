@@ -19,6 +19,7 @@ export class Store {
         console.log('gsdabc', this._actions)
         console.log('gsdabc1', this._mutations)
         console.log('gsdabc2', this._wrappedGetters)
+        console.log('gsdabc3', state)
         const store = this
         const { dispatch, commit } = this
         this.dispatch = function boundDispatch (type, payload) {
@@ -41,8 +42,19 @@ export class Store {
     }
 }
 
+function getNestedState (state, path) {
+    return path.reduce((state, key) => state[key], state)
+}
+
 function installModule (store, rootState, path, module, hot) {
+    const isRoot = !path.length
     const namespace = ''
+    if (!isRoot) {
+        const parentState = getNestedState(rootState, path.slice(0, -1))
+        const moduleName = path[path.length - 1]
+        Vue.set(parentState, moduleName, module.state)
+    }
+
     const local = {
         state: rootState
     }
