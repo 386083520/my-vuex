@@ -26,17 +26,77 @@
         Object.keys(obj).forEach(key => fn(obj[key], key));
     }
 
+    class Module {
+        constructor (rawModule, runtime) {
+            this.runtime = runtime;
+            this._children = Object.create(null);
+            this._rawModule = rawModule;
+            const rawState = rawModule.state;
+            this.state = rawState;
+        }
+        getChild (key) {
+            return this._children[key]
+        }
+        addChild (key, module) {
+            this._children[key] = module;
+        }
+    }
+
+    class ModuleCollection {
+        constructor (rawRootModule) {
+            this.register([], rawRootModule, false);
+        }
+        get (path) {
+            return path.reduce((module, key) => {
+                return module.getChild(key)
+            }, this.root)
+        }
+        register (path, rawModule, runtime = true) {
+            const newModule = new Module(rawModule, runtime);
+            if (path.length === 0) {
+                this.root = newModule;
+            }else {
+                const parent = this.get(path.slice(0, -1));
+                parent.addChild(path[path.length - 1], newModule);
+            }
+            if (rawModule.modules) {
+                forEachValue(rawModule.modules, (rawChildModule, key) => {
+                    this.register(path.concat(key), rawChildModule, runtime);
+                });
+            }
+        }
+    }
+
     let Vue;
 
     class Store {
         constructor (options = {}) {
             console.log('gsdoptions', options);
+
+            this._modules = new ModuleCollection(options);
+            console.log('gsd_modules', this._modules);
             const state = options.state;
             this._wrappedGetters = options.getters;
+
+            const store = this;
+            const { dispatch, commit } = this;
+            this.dispatch = function boundDispatch (type, payload) {
+                return dispatch.call(store, type, payload)
+            };
+            this.commit = function boundCommit (type, payload, options) {
+                return commit.call(store, type, payload, options)
+            };
+
             resetStoreVM(this, state);
         }
         get state () {
             return this._vm._data.$$state
+        }
+        commit (_type, _payload, _options) {
+
+        }
+        dispatch (_type, _payload) {
+
         }
     }
 

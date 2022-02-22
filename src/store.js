@@ -1,11 +1,15 @@
 import applyMixin from './mixin'
 import { forEachValue } from './util'
+import ModuleCollection from './module/module-collection'
 
 let Vue
 
 export class Store {
     constructor (options = {}) {
         console.log('gsdoptions', options)
+
+        this._modules = new ModuleCollection(options)
+        console.log('gsd_modules', this._modules)
         const state = options.state
         this._wrappedGetters = options.getters
 
